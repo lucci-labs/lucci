@@ -1,5 +1,5 @@
 import { BaseAdapter } from './base-adapter.ts';
-import { Action } from '../types/index.ts';
+import type { Action } from '../types/index.ts';
 
 /**
  * Adapter for Jupiter Aggregator on Solana.

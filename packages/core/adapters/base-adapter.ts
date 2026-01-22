@@ -1,4 +1,4 @@
-import { Adapter, Action } from '../types/index.ts';
+import type { Adapter, Action } from '../types/index.ts';
 
 /**
  * Abstract base class for DeFi protocol adapters.

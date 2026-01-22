@@ -1,5 +1,7 @@
+import { tool, stepCountIs } from 'ai';
+import { z } from 'zod';
 import { ContextManager } from '../context/context-manager.ts';
-import { ToolDefinition, Action, Adapter } from '../types/index.ts';
+import type { Action, Adapter } from '../types/index.ts';
 
 /**
  * ToolManager serves as a registry for tools available to the LLM.
@@ -25,48 +27,33 @@ export class ToolManager {
   /**
    * Returns the list of available tools for the LLM.
    */
-  getTools(): ToolDefinition[] {
-    return [
-      {
-        name: 'get_portfolio',
+  getTools() {
+    return {
+      get_portfolio: tool({
         description: 'Fetches the portfolio assets for a given user address.',
-        parameters: {
-          type: 'object',
-          properties: {
-            address: { type: 'string', description: 'The user wallet address' }
-          },
-          required: ['address']
-        },
+        inputSchema: z.object({
+          address: z.string().describe('The user wallet address')
+        }),
         execute: async ({ address }: { address: string }) => {
           return this.contextManager.getPortfolio(address);
         }
-      },
-      {
-        name: 'search_knowledge',
+      }),
+      search_knowledge: tool({
         description: 'Searches the knowledge base for information about protocols, concepts, or static data.',
-        parameters: {
-          type: 'object',
-          properties: {
-            query: { type: 'string', description: 'The search query' }
-          },
-          required: ['query']
-        },
+        inputSchema: z.object({
+          query: z.string().describe('The search query')
+        }),
         execute: async ({ query }: { query: string }) => {
           return this.contextManager.queryKnowledgeBase(query);
         }
-      },
-      {
-        name: 'execute_action',
+      }),
+      execute_action: tool({
         description: 'Executes a DeFi action (swap, transfer, etc.) using a registered protocol adapter.',
-        parameters: {
-          type: 'object',
-          properties: {
-            protocol: { type: 'string', description: 'The protocol to use (e.g., jupiter)' },
-            type: { type: 'string', enum: ['swap', 'transfer', 'bridge', 'stake'], description: 'Type of action' },
-            params: { type: 'object', description: 'Parameters for the action' }
-          },
-          required: ['protocol', 'type', 'params']
-        },
+        inputSchema: z.object({
+          protocol: z.string().describe('The protocol to use (e.g., jupiter)'),
+          type: z.enum(['swap', 'transfer', 'bridge', 'stake']).describe('Type of action'),
+          params: z.record(z.string(), z.any()).describe('Parameters for the action')
+        }),
         execute: async (args: any) => {
           const { protocol, type, params } = args;
           const adapter = this.adapters.get(protocol);
@@ -78,19 +65,24 @@ export class ToolManager {
           const action: Action = { protocol, type, params };
           return adapter.execute(action);
         }
-      }
-    ];
+      })
+    };
   }
 
   /**
    * helper to execute a tool by name
    */
   async executeTool(name: string, args: any): Promise<any> {
-    const tools = this.getTools();
-    const tool = tools.find(t => t.name === name);
-    if (!tool) {
+    const tools = this.getTools() as any;
+    const toolInstance = tools[name];
+    if (!toolInstance) {
       throw new Error(`Tool not found: ${name}`);
     }
-    return tool.execute(args);
+    // Validate arguments against schema
+    const validation = toolInstance.inputSchema.safeParse(args);
+    if (!validation.success) {
+      throw new Error(`Invalid arguments for tool ${name}: ${validation.error.message}`);
+    }
+    return toolInstance.execute(validation.data);
   }
 }

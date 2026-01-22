@@ -1,4 +1,4 @@
-import { PortfolioData } from '../types/index.ts';
+import type { PortfolioData } from '../types/index.ts';
 
 /**
  * Interface for portfolio data providers.

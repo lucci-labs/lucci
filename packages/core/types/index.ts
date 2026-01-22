@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 export interface PortfolioData {
   address: string;
   totalValueUsd: number;
@@ -20,13 +22,6 @@ export interface Action {
 export interface AgentPlan {
   steps: Action[];
   reasoning: string;
-}
-
-export interface ToolDefinition {
-  name: string;
-  description: string;
-  parameters: any;
-  execute: (args: any) => Promise<any>;
 }
 
 export interface Adapter {
