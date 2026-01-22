@@ -13,19 +13,34 @@ export interface Asset {
   chain: string;
 }
 
-export interface Action {
-  type: 'swap' | 'transfer' | 'bridge' | 'stake';
-  protocol: string;
-  params: Record<string, any>;
+/**
+ * Interface for Action-based Adapters.
+ * Instead of protocols, we register capabilities (e.g., Swap, Transfer).
+ */
+export interface ActionAdapter<T = any> {
+  /**
+   * The name of the action (e.g., 'swap', 'transfer').
+   * This will be used as the tool name for the AI.
+   */
+  actionType: string;
+
+  /**
+   * Description for the AI to understand when to use this tool.
+   */
+  description: string;
+
+  /**
+   * Zod schema defining the input parameters for this action.
+   */
+  inputSchema: z.ZodType<T>;
+
+  /**
+   * Executes the action with the validated arguments.
+   */
+  execute(args: T): Promise<any>;
 }
 
 export interface AgentPlan {
-  steps: Action[];
+  steps: any[]; // Loosened for now as Action structure is dynamic
   reasoning: string;
-}
-
-export interface Adapter {
-  name: string;
-  supportedChains: string[];
-  execute(action: Action): Promise<any>;
 }

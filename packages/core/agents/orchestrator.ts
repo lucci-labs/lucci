@@ -1,7 +1,8 @@
 import { generateText, stepCountIs } from 'ai';
 import { ContextManager } from '../context/context-manager.ts';
 import { ToolManager } from '../tools/tool-manager.ts';
-import { JupiterAdapter } from '../adapters/jupiter-adapter.ts';
+import { SwapAdapter } from '../adapters/swap-adapter.ts';
+import { TransferAdapter } from '../adapters/transfer-adapter.ts';
 import { google } from '@ai-sdk/google';
 import { getSystemPrompt } from './system-prompt.ts';
 
@@ -23,8 +24,9 @@ export class Agent {
     this.contextManager = new ContextManager();
     this.toolManager = new ToolManager(this.contextManager);
 
-    // Register default adapters
-    this.toolManager.registerAdapter(new JupiterAdapter());
+    // Register Action Adapters
+    this.toolManager.registerAdapter(new SwapAdapter());
+    this.toolManager.registerAdapter(new TransferAdapter());
   }
 
   /**

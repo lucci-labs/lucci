@@ -1,20 +1,20 @@
 import { describe, expect, it } from 'bun:test';
 import { ToolManager } from '../tools/tool-manager';
 import { ContextManager } from '../context/context-manager';
-import { JupiterAdapter } from '../adapters/jupiter-adapter';
+import { SwapAdapter } from '../adapters/swap-adapter';
 
 describe('ToolManager', () => {
   const contextManager = new ContextManager();
   const toolManager = new ToolManager(contextManager);
 
-  // Register the adapter so execute_action works
-  toolManager.registerAdapter(new JupiterAdapter());
+  // Register the adapter
+  toolManager.registerAdapter(new SwapAdapter());
 
   it('should return defined tools', () => {
-    const tools = toolManager.getTools();
+    const tools = toolManager.getTools() as any;
     expect(tools.get_portfolio).toBeDefined();
     expect(tools.search_knowledge).toBeDefined();
-    expect(tools.execute_action).toBeDefined();
+    expect(tools.swap).toBeDefined(); // Dynamically registered
   });
 
   it('should execute get_portfolio tool', async () => {
@@ -29,18 +29,16 @@ describe('ToolManager', () => {
     expect(result[0]).toContain('Jupiter');
   });
 
-  it('should execute execute_action tool', async () => {
+  it('should execute dynamic swap tool', async () => {
     const args = {
-      protocol: 'jupiter',
-      type: 'swap',
-      params: {
-        input: 'SOL',
-        output: 'USDC',
-        amount: 1
-      }
+      tokenIn: 'SOL',
+      tokenOut: 'USDC',
+      amount: 1,
+      chain: 'solana'
     };
-    const result = await toolManager.executeTool('execute_action', args);
+    const result = await toolManager.executeTool('swap', args);
     expect(result.status).toBe('success');
+    expect(result.details.protocol).toBe('jupiter');
   });
 
   it('should fail when executing unknown tool', async () => {
@@ -48,20 +46,6 @@ describe('ToolManager', () => {
         await toolManager.executeTool('unknown_tool', {});
     } catch (e: any) {
         expect(e.message).toContain('Tool not found');
-    }
-  });
-
-  it('should fail when executing action with unknown protocol', async () => {
-    const args = {
-        protocol: 'unknown_protocol',
-        type: 'swap',
-        params: {}
-      };
-      
-    try {
-        await toolManager.executeTool('execute_action', args);
-    } catch (e: any) {
-        expect(e.message).toContain('No adapter registered');
     }
   });
 });
