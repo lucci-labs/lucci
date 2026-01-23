@@ -81,15 +81,16 @@ export class Agent {
    * Main entry point for processing a chat request without streaming.
    * @param messages - The conversation history.
    */
-  requestResponse = async (messages: any[]) => {
-    // In a real scenario, we might want to fetch some initial context here
-    // or let the tools fetch it dynamically.
-    const initialContext = "No specific context provided yet.";
-
+  requestResponse = async (messages: any[], userAddress?: string) => {
+    let context = ""
+    if (userAddress) {
+      const portfolio = await this.contextManager.getPortfolio(userAddress);
+      context = `User Address: ${userAddress}\nPortfolio: ${JSON.stringify(portfolio)}`;
+    }
     const result = await generateText({
       model: google('gemini-3-flash-preview'), // Updated model name for better tool calling performance
       stopWhen: stepCountIs(5), // Allow multi-step interactions
-      system: getSystemPrompt(initialContext),
+      system: getSystemPrompt(context),
       messages, // Pass the full conversation history
       tools: this.getTools(),
     });
@@ -101,19 +102,19 @@ export class Agent {
    * Main entry point for processing a chat request with streaming.
    * @param messages - The conversation history.
    */
-  streamResponse = async (messages: any[]) => {
-    // In a real scenario, we might want to fetch some initial context here
-    // or let the tools fetch it dynamically.
-    const userAddress = "0x1234567890123456789012345678901234567890";
-    const initialContext = `
-    User Address: ${userAddress}
-    `
+  streamResponse = async (messages: any[], userAddress?: string) => {
+    let context = "";
+    if (userAddress) {
+      // prepare context
+      const portfolio = await this.contextManager.getPortfolio(userAddress);
+      context = `User Address: ${userAddress}\nPortfolio: ${JSON.stringify(portfolio)}`;
+    }
 
     const result = streamText({
       model: google('gemini-3-flash-preview'), // Updated model name for better tool calling performance
       // @ts-ignore
       maxSteps: 5, // Allow multi-step interactions
-      system: getSystemPrompt(initialContext),
+      system: getSystemPrompt(context),
       messages, // Pass the full conversation history
       tools: this.getTools(),
     });
