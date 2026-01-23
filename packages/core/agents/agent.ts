@@ -21,7 +21,11 @@ export class Agent {
     this.toolManager.registerAdapter(new SwapAdapter());
     this.toolManager.registerAdapter(new TransferAdapter());
   }
-
+  
+  /**
+   * Main entry point for processing a chat request without streaming.
+   * @param messages - The conversation history.
+   */
   async requestResponse(messages: any[]) {
     // In a real scenario, we might want to fetch some initial context here
     // or let the tools fetch it dynamically.
@@ -50,7 +54,7 @@ export class Agent {
     const initialContext = "No specific context provided yet.";
 
     const result = streamText({
-      model: google('gemini-1.5-pro-latest'),
+      model: google('gemini-3-flash-preview'),
       stopWhen: stepCountIs(5),
       system: getSystemPrompt(initialContext),
       messages, // Pass the full conversation history
