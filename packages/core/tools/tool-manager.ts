@@ -1,7 +1,7 @@
 import { tool } from 'ai';
 import { z } from 'zod';
-import { ContextManager } from '../context/context-manager.ts';
-import type { ActionAdapter } from '../types/index.ts';
+import { ContextManager } from '../context/context-manager';
+import type { ActionAdapter } from '../types/index';
 
 /**
  * ToolManager serves as a registry for tools available to the LLM.

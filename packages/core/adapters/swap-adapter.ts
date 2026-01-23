@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { ActionAdapter } from '../types/index.ts';
+import type { ActionAdapter } from '../types/index';
 
 /**
  * Smart Action Adapter for token swaps.

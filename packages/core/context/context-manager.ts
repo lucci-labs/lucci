@@ -1,6 +1,6 @@
-import { PortfolioProvider } from './portfolio-provider.ts';
-import { KnowledgeBase } from './knowledge-base.ts';
-import type { PortfolioData } from '../types/index.ts';
+import { PortfolioProvider } from './portfolio-provider';
+import { KnowledgeBase } from './knowledge-base';
+import type { PortfolioData } from '../types/index';
 
 /**
  * ContextManager acts as a coordinator for gathering real-time data
