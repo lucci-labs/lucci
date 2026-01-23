@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'bun:test';
-import { SwapAdapter } from '../tools/swap';
+import { Swap } from '../tools/swap';
 
 describe('SwapAdapter', () => {
-  const adapter = new SwapAdapter();
+  const adapter = new Swap();
 
   it('should have correct actionType', () => {
-    expect(adapter.actionType).toBe('swap');
+    expect(adapter.toolType).toBe('swap');
   });
 
   it('should execute swap action correctly', async () => {

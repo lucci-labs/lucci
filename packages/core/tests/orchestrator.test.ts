@@ -1,5 +1,5 @@
 import { describe, expect, it, mock } from 'bun:test';
-import { Agent } from '../agents/orchestrator';
+import { Agent } from '../agents/agent';
 
 // Mock the AI SDK dependencies
 mock.module('ai', () => ({
@@ -19,8 +19,7 @@ mock.module('@ai-sdk/google', () => ({
 describe('Agent Orchestrator', () => {
   it('should process request using mocked AI', async () => {
     const agent = new Agent();
-    const result = await agent.processRequest('Hello agent');
-    
-    expect(result).toBe('Mocked AI response');
+    const result = await agent.chat([]);
+    expect(result.text).toBe('Mocked AI response');
   });
 });

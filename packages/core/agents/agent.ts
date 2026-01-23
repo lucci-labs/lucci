@@ -1,4 +1,4 @@
-import { streamText, stepCountIs, generateText, tool } from 'ai';
+import { streamText, stepCountIs, generateText, tool, type GenerateTextResult, type StreamTextResult, type ModelMessage } from 'ai';
 import { z } from 'zod';
 import { ContextManager } from '../context/context-manager';
 import { Swap } from '../tools/swap';
@@ -6,6 +6,13 @@ import { Transfer } from '../tools/transfer';
 import { google } from '@ai-sdk/google';
 import { getSystemPrompt } from './system-prompt';
 import type { Tool } from '../types';
+import type { Address } from '@solana/kit';
+
+export type AgentTools = ReturnType<Agent['getTools']>
+export type AgentConfig = {
+  modelName?: string;
+  isMainnet: boolean;
+}
 
 /**
  * Agent manages the central agentic loop with streaming support.
@@ -13,9 +20,15 @@ import type { Tool } from '../types';
 export class Agent {
   private contextManager: ContextManager;
   private tools: Map<string, Tool> = new Map();
+  private modelName: string = 'gemini-3-flash-preview';
 
-  constructor() {
+  constructor(config?: AgentConfig) {
     this.contextManager = new ContextManager();
+    if (config) {
+      if (config.modelName) {
+        this.modelName = config.modelName;
+      }
+    }
   }
 
   default = () => {
@@ -29,6 +42,9 @@ export class Agent {
    * @param adapter - The Action Adapter to register.
    */
   use = (tool: Tool) => {
+    if (this.tools.has(tool.toolType)) {
+      throw new Error(`Tool ${tool.toolType} already registered.`);
+    }
     this.tools.set(tool.toolType, tool);
     console.log(`[Agent] Registered tool: ${tool.toolType}`);
   }
@@ -67,9 +83,7 @@ export class Agent {
       actionTools[n] = tool({
         description: t.description,
         inputSchema: t.inputSchema,
-        execute: async (args: any) => {
-          return t.execute(args);
-        }
+        execute: t.execute
       });
     }
 
@@ -77,21 +91,28 @@ export class Agent {
     return { ...baseTools, ...actionTools };
   }
 
-  /**
-   * Main entry point for processing a chat request without streaming.
-   * @param messages - The conversation history.
-   */
-  requestResponse = async (messages: any[], userAddress?: string) => {
+  private prepareContext = async (userAddress?: Address): Promise<string> => {
     let context = ""
     if (userAddress) {
       const portfolio = await this.contextManager.getPortfolio(userAddress);
       context = `User Address: ${userAddress}\nPortfolio: ${JSON.stringify(portfolio)}`;
     }
+    return context;
+  }
+
+  /**
+   * Processes a chat request using the LLM.
+   * @param messages - The conversation history.
+   * @param userAddress - The user's wallet address.
+   */
+  chat = async (messages: ModelMessage[], userAddress?: Address): Promise<GenerateTextResult<AgentTools, any>> => {
+    const context = await this.prepareContext(userAddress);
+
     const result = await generateText({
-      model: google('gemini-3-flash-preview'), // Updated model name for better tool calling performance
-      stopWhen: stepCountIs(5), // Allow multi-step interactions
+      model: google(this.modelName),
+      stopWhen: stepCountIs(5),
       system: getSystemPrompt(context),
-      messages, // Pass the full conversation history
+      messages,
       tools: this.getTools(),
     });
 
@@ -99,23 +120,18 @@ export class Agent {
   }
 
   /**
-   * Main entry point for processing a chat request with streaming.
+   * Processes a chat request using the LLM with streaming output.
    * @param messages - The conversation history.
+   * @param userAddress - The user's wallet address.
    */
-  streamResponse = async (messages: any[], userAddress?: string) => {
-    let context = "";
-    if (userAddress) {
-      // prepare context
-      const portfolio = await this.contextManager.getPortfolio(userAddress);
-      context = `User Address: ${userAddress}\nPortfolio: ${JSON.stringify(portfolio)}`;
-    }
+  stream = async (messages: ModelMessage[], userAddress?: Address): Promise<StreamTextResult<AgentTools, any>> => {
+    const context = await this.prepareContext(userAddress);
 
     const result = streamText({
-      model: google('gemini-3-flash-preview'), // Updated model name for better tool calling performance
-      // @ts-ignore
-      maxSteps: 5, // Allow multi-step interactions
+      model: google(this.modelName),
+      stopWhen: stepCountIs(5),
       system: getSystemPrompt(context),
-      messages, // Pass the full conversation history
+      messages,
       tools: this.getTools(),
     });
 

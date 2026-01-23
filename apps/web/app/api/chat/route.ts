@@ -9,7 +9,7 @@ export async function POST(req: Request) {
 
   // Convert UI messages to ModelMessages (compatible with streamText in this version)
   // Await the conversion as it might handle async operations (e.g. downloads)
-  const coreMessages = (await convertToModelMessages(messages)) as any[];
-  const result = await agent.streamResponse(coreMessages);
+  const coreMessages = await convertToModelMessages(messages);
+  const result = await agent.stream(coreMessages);
   return result.toUIMessageStreamResponse();
 }
