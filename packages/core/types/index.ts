@@ -14,15 +14,15 @@ export interface Asset {
 }
 
 /**
- * Interface for Action-based Adapters.
+ * Interface for Tool-based Adapters.
  * Instead of protocols, we register capabilities (e.g., Swap, Transfer).
  */
-export interface ActionAdapter<T = any> {
+export interface Tool<T = any> {
   /**
-   * The name of the action (e.g., 'swap', 'transfer').
+   * The name of the tool (e.g., 'swap', 'transfer').
    * This will be used as the tool name for the AI.
    */
-  actionType: string;
+  toolType: string;
 
   /**
    * Description for the AI to understand when to use this tool.

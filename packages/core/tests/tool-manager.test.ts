@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'bun:test';
 import { ToolManager } from '../tools/tool-manager';
 import { ContextManager } from '../context/context-manager';
-import { SwapAdapter } from '../adapters/swap-adapter';
+import { SwapAdapter } from '../tools/swap';
 
 describe('ToolManager', () => {
   const contextManager = new ContextManager();
@@ -43,9 +43,9 @@ describe('ToolManager', () => {
 
   it('should fail when executing unknown tool', async () => {
     try {
-        await toolManager.executeTool('unknown_tool', {});
+      await toolManager.executeTool('unknown_tool', {});
     } catch (e: any) {
-        expect(e.message).toContain('Tool not found');
+      expect(e.message).toContain('Tool not found');
     }
   });
 });

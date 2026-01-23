@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { SwapAdapter } from '../adapters/swap-adapter';
+import { SwapAdapter } from '../tools/swap';
 
 describe('SwapAdapter', () => {
   const adapter = new SwapAdapter();

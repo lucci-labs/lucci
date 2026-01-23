@@ -1,9 +1,9 @@
 // core/adapters/swap-adapter.ts
 import { z } from 'zod';
-import type { ActionAdapter } from '../types/index';
+import type { Tool } from '../types/index';
 
-export class SwapAdapter implements ActionAdapter {
-  actionType = 'swap';
+export class Swap implements Tool {
+  toolType = 'swap';
   description = 'Prepare a token swap transaction. This tool returns a transaction that must be signed by the user wallet.';
 
   inputSchema = z.object({

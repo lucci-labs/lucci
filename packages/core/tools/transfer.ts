@@ -1,12 +1,12 @@
 import { z } from 'zod';
-import type { ActionAdapter } from '../types/index';
+import type { Tool } from '../types/index';
 
 /**
  * Action Adapter for asset transfers.
  * Handles sending native tokens or SPL/ERC20 tokens to another address.
  */
-export class TransferAdapter implements ActionAdapter {
-  actionType = 'transfer';
+export class Transfer implements Tool {
+  toolType = 'transfer';
   description = 'Sends crypto assets from the user wallet to another address.';
 
   inputSchema = z.object({
