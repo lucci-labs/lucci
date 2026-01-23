@@ -53,7 +53,7 @@ export class ToolManager {
 
     // 2. Generate Dynamic Tools from Adapters
     const actionTools: Record<string, any> = {};
-    
+
     for (const [name, adapter] of this.adapters) {
       actionTools[name] = tool({
         description: adapter.description,
@@ -74,7 +74,7 @@ export class ToolManager {
   async executeTool(name: string, args: any): Promise<any> {
     const tools = this.getTools() as any;
     const toolInstance = tools[name];
-    
+
     if (!toolInstance) {
       throw new Error(`Tool not found: ${name}`);
     }

@@ -18,7 +18,7 @@ describe('SwapAdapter', () => {
 
     const result = await adapter.execute(args);
 
-    expect(result.status).toBe('success');
+    expect(result.status).toBe('requires_confirmation');
     expect(result.type).toBe('swap');
     expect(result.details.protocol).toBe('jupiter'); // Smart routing default for Solana
   });

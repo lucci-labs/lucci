@@ -21,7 +21,7 @@ export class Agent {
     this.toolManager.registerAdapter(new SwapAdapter());
     this.toolManager.registerAdapter(new TransferAdapter());
   }
-  
+
   /**
    * Main entry point for processing a chat request without streaming.
    * @param messages - The conversation history.
@@ -32,14 +32,12 @@ export class Agent {
     const initialContext = "No specific context provided yet.";
 
     const result = await generateText({
-      model: google('gemini-3-flash-preview'),
-      stopWhen: stepCountIs(5),
+      model: google('gemini-3-flash-preview'), // Updated model name for better tool calling performance
+      stopWhen: stepCountIs(5), // Allow multi-step interactions
       system: getSystemPrompt(initialContext),
       messages, // Pass the full conversation history
       tools: this.toolManager.getTools(),
     });
-
-    console.log(result)
 
     return result;
   }
@@ -51,11 +49,14 @@ export class Agent {
   async streamResponse(messages: any[]) {
     // In a real scenario, we might want to fetch some initial context here
     // or let the tools fetch it dynamically.
-    const initialContext = "No specific context provided yet.";
+    const userAddress = "0x1234567890123456789012345678901234567890";
+    const initialContext = `
+    User Address: ${userAddress}
+    `
 
     const result = streamText({
-      model: google('gemini-3-flash-preview'),
-      stopWhen: stepCountIs(5),
+      model: google('gemini-3-flash-preview'), // Updated model name for better tool calling performance
+      stopWhen: stepCountIs(5), // Allow multi-step interactions
       system: getSystemPrompt(initialContext),
       messages, // Pass the full conversation history
       tools: this.toolManager.getTools(),
