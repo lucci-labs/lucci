@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'bun:test';
 import { ContextManager } from '../context/context-manager';
+import { zeroAddress } from 'viem';
 
 describe('ContextManager', () => {
-  const contextManager = new ContextManager();
+  const contextManager = new ContextManager({
+    rpc: 'https://api.mainnet-beta.solana.com',
+  });
 
   it('should fetch portfolio data', async () => {
     const address = '0x123...';
@@ -31,4 +34,9 @@ describe('ContextManager', () => {
     expect(results).toBeDefined();
     expect(results[0]).toContain('Lucci SDK');
   });
+
+  it('should stringify context', async () => {
+    const contextString = await contextManager.stringtifyContext(zeroAddress);
+    console.log('Context String:', contextString);
+  })
 });

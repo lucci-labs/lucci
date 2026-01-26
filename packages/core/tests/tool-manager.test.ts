@@ -6,7 +6,7 @@ describe('Agent Tools', () => {
   const agent = new Agent();
 
   // Register the tool
-  agent.use(new Swap());
+  agent.use(Swap);
 
   // Access private getTools for testing
   const getTools = (agent as any).getTools;

@@ -1,11 +1,18 @@
 import { z } from 'zod';
 import type { Tool } from '../types/index';
+import type { ContextManager } from '../context/context-manager';
 
 /**
  * Action Adapter for asset transfers.
  * Handles sending native tokens or SPL/ERC20 tokens to another address.
  */
 export class Transfer implements Tool {
+  private contextManager: ContextManager;
+
+  constructor(contextManager: ContextManager) {
+    this.contextManager = contextManager;
+  }
+
   toolType = 'transfer';
   description = 'Sends crypto assets from the user wallet to another address.';
 

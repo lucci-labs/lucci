@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { ContextManager } from '../context/context-manager';
 
 export interface PortfolioData {
   address: string;
@@ -38,6 +39,10 @@ export interface Tool<T = any> {
    * Executes the action with the validated arguments.
    */
   execute(args: T): Promise<any>;
+}
+
+export interface ToolConstructor<T = any> {
+  new (context: ContextManager): Tool<T>;
 }
 
 export interface AgentPlan {

@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'bun:test';
 import { Swap } from '../tools/swap';
+import { ContextManager } from '../context/context-manager';
 
 describe('SwapAdapter', () => {
-  const adapter = new Swap();
+  const contextManager = new ContextManager({ rpc: 'http://mock-rpc' });
+  const adapter = new Swap(contextManager);
 
   it('should have correct actionType', () => {
     expect(adapter.toolType).toBe('swap');

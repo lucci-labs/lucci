@@ -5,13 +5,13 @@ import { Swap } from '../tools/swap';
 import { Transfer } from '../tools/transfer';
 import { google } from '@ai-sdk/google';
 import { getSystemPrompt } from './system-prompt';
-import type { Tool } from '../types';
+import type { Tool, ToolConstructor } from '../types';
 import type { Address } from '@solana/kit';
 
 export type AgentTools = ReturnType<Agent['getTools']>
 export type AgentConfig = {
   modelName?: string;
-  isMainnet: boolean;
+  rpc?: string;
 }
 
 /**
@@ -23,7 +23,9 @@ export class Agent {
   private modelName: string = 'gemini-3-flash-preview';
 
   constructor(config?: AgentConfig) {
-    this.contextManager = new ContextManager();
+    this.contextManager = new ContextManager({
+      rpc: config?.rpc || 'https://api.mainnet-beta.solana.com',
+    });
     if (config) {
       if (config.modelName) {
         this.modelName = config.modelName;
@@ -31,22 +33,26 @@ export class Agent {
     }
   }
 
-  default = () => {
+  default = (): Agent => {
     // register default adapter
-    this.use(new Swap());
-    this.use(new Transfer());
+    this.use(Swap);
+    this.use(Transfer);
+
+    return this;
   }
 
   /**
    * Registers a new Action Adapter as a tool.
-   * @param adapter - The Action Adapter to register.
+   * @param ToolClass - The Action Adapter class to register.
    */
-  use = (tool: Tool) => {
-    if (this.tools.has(tool.toolType)) {
-      throw new Error(`Tool ${tool.toolType} already registered.`);
+  use = (ToolClass: ToolConstructor): Agent => {
+    const toolInstance = new ToolClass(this.contextManager);
+    if (this.tools.has(toolInstance.toolType)) {
+      throw new Error(`Tool ${toolInstance.toolType} already registered.`);
     }
-    this.tools.set(tool.toolType, tool);
-    console.log(`[Agent] Registered tool: ${tool.toolType}`);
+    this.tools.set(toolInstance.toolType, toolInstance);
+
+    return this;
   }
 
   /**
@@ -83,7 +89,7 @@ export class Agent {
       actionTools[n] = tool({
         description: t.description,
         inputSchema: t.inputSchema,
-        execute: t.execute
+        execute: (args) => t.execute(args)
       });
     }
 

@@ -1,7 +1,14 @@
 import { z } from 'zod';
 import type { Tool } from '../types/index';
+import type { ContextManager } from '../context/context-manager';
 
 export class Swap implements Tool {
+  private contextManager: ContextManager;
+
+  constructor(contextManager: ContextManager) {
+    this.contextManager = contextManager;
+  }
+
   toolType = 'swap';
   description = 'Prepare a token swap transaction. This tool returns a transaction that must be signed by the user wallet.';
 
